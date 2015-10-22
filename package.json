@@ -1,0 +1,22 @@
+{
+  "title": "Booru Extractor",
+  "name": "booruextractor",
+  "version": "0.0.1",
+  "preferences": [
+      {
+        "name": "imagesDirectory",
+        "title": "Images directory path",
+        "description": "Directory, where images should be downloaded",
+        "type": "directory",
+        "value": "C:\\Temp\\gb\\"
+      }
+  ],
+  "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently only Gelbooru is supported.",
+  "main": "index.js",
+  "author": "VA",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "license": "MIT"
+}
