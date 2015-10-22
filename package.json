@@ -8,7 +8,7 @@
         "title": "Images directory path",
         "description": "Directory, where images should be downloaded",
         "type": "directory",
-        "value": "C:\\Temp\\gb\\"
+        "value": "C:\\Temp\\"
       }
   ],
   "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently only Gelbooru is supported.",
