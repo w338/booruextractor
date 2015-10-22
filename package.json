@@ -11,7 +11,7 @@
         "value": "C:\\Temp\\"
       }
   ],
-  "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently only Gelbooru is supported.",
+  "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently Gelbooru, Danbooru, Booru.org is supported.",
   "main": "index.js",
   "author": "VA",
   "engines": {

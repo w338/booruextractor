@@ -1,61 +1,57 @@
-// Declarations
-var { Cc, Cu, Ci } = require("chrome");
-
-const {Downloads} = Cu.import("resource://gre/modules/Downloads.jsm");
-Cu.import("resource://gre/modules/osfile.jsm")
-Cu.import("resource://gre/modules/Task.jsm");
-Cu.import("resource://gre/modules/NetUtil.jsm");  
-const {FileUtils} = Cu.import("resource://gre/modules/FileUtils.jsm"); 
-
-var data = require("sdk/self").data;
+// Add-on SDK
 var pageMod = require("sdk/page-mod");
 var preferences = require('sdk/simple-prefs').prefs;
+var { setTimeout } = require("sdk/timers");
 
-// Listener for Gelbooru images
-pageMod.PageMod({
-    include: "http://gelbooru.com/index.php?page=post&s=view&id=*",
-    contentScriptFile: data.url("element-getter.js"),
-    onAttach: function(worker) {
-        worker.port.emit("getImageGelbooru");
-        worker.port.on("gotImageGelbooru", function(data) {
-            console.log("Image data: "+data);
-            DownloadImage(data);
-        });
-    }
-});
+// Supported sources
+var sources = [
+    {"filter": "http://gelbooru.com/index.php?page=post&s=view&id=*","getter": "./gelbooru.js"},
+    {"filter": "http://danbooru.donmai.us/posts/*","getter": "./danbooru.js"},
+    {"filter": /.*booru.org.*/,"getter": "./booruorg.js"}
+];
 
-// Listener for Danbooru images
-pageMod.PageMod({
-    include: "http://danbooru.donmai.us/posts/*",
-    contentScriptFile: data.url("element-getter.js"),
-    onAttach: function(worker) {
-        worker.port.emit("getImageDanbooru");
-        worker.port.on("gotImageDanbooru", function(data) {
-            console.log("Image data: "+data);
-            DownloadImage(data);
-        });
-    }
-});
+// Adding listeners
+for (let source of sources) {
+    pageMod.PageMod({
+        include: source["filter"],
+        contentScriptWhen: "ready",
+        contentScriptFile: source["getter"],
+        onAttach: function(worker) {
+            worker.port.emit("getImage");
+            worker.port.on("gotImage", function(data) {
+                console.log("Image data: "+data);
+                DownloadImage(data);
+            });
+        }
+    });
+}
 
 // Downloader
 function DownloadImage(data) {
+    
+    // Components
+    var { Cc, Cu, Ci } = require("chrome");
+    Cu.import("resource://gre/modules/Task.jsm");
+
     Task.spawn(function () {
+        
+        // Components
+        const {Downloads} = Cu.import("resource://gre/modules/Downloads.jsm");
+        Cu.import("resource://gre/modules/osfile.jsm")
+        Cu.import("resource://gre/modules/NetUtil.jsm");  
+        const {FileUtils} = Cu.import("resource://gre/modules/FileUtils.jsm"); 
 
         // Check for folder presense
-        let localFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+        let Dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
         let dirPath = OS.Path.join(preferences['imagesDirectory'], data[2]);
-        console.log("Dir path: "+dirPath);
-        localFile.initWithPath(dirPath);
-        if(!localFile.exists()) {
-            localFile.create(localFile.DIRECTORY_TYPE,FileUtils.PERMS_DIRECTORY);
+        Dir.initWithPath(dirPath);
+        if(!Dir.exists()) {
+            Dir.create(Dir.DIRECTORY_TYPE,FileUtils.PERMS_DIRECTORY);
         }
 
         // Download file
         let path = OS.Path.join(preferences['imagesDirectory'], data[2], data[1]);
-        console.log("Path: "+path);
-
         yield Downloads.fetch(data[0], path);
-        console.log("Image has been downloaded.");
 
     }).then(null, Cu.reportError);
 }
