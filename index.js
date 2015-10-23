@@ -1,13 +1,12 @@
 // Add-on SDK
 var pageMod = require("sdk/page-mod");
 var preferences = require('sdk/simple-prefs').prefs;
-var { setTimeout } = require("sdk/timers");
 
 // Supported sources
 var sources = [
-    {"filter": "http://gelbooru.com/index.php?page=post&s=view&id=*","getter": "./gelbooru.js"},
-    {"filter": "http://danbooru.donmai.us/posts/*","getter": "./danbooru.js"},
-    {"filter": /.*booru.org.*/,"getter": "./booruorg.js"}
+    {"filter": "http://gelbooru.com/index.php?page=post&s=view&id=*", "getter": "./gelbooru.js"},
+    {"filter": "http://danbooru.donmai.us/posts/*", "getter": "./danbooru.js"},
+    {"filter": /.*booru.org.*/, "getter": "./booruorg.js"}
 ];
 
 // Adding listeners
@@ -50,8 +49,12 @@ function DownloadImage(data) {
         }
 
         // Download file
+        let source = {
+            url: data[0],
+            referrer: data[3],
+        };
         let path = OS.Path.join(preferences['imagesDirectory'], data[2], data[1]);
-        yield Downloads.fetch(data[0], path);
+        yield Downloads.fetch(source, path);
 
     }).then(null, Cu.reportError);
 }

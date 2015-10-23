@@ -4,6 +4,6 @@ self.port.on("getImage", function () {
     if (element != null) {
         let url = element.getAttribute("src");
         let fileName = url.substring(url.lastIndexOf("/") + 1, url.indexOf("?"));
-        self.port.emit("gotImage", [url, fileName, "Gelbooru"]);
+        self.port.emit("gotImage", [url, fileName, "Gelbooru", window.location.href]);
     }
 });
