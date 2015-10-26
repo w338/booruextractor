@@ -4,6 +4,12 @@ self.port.on("getImage", function () {
     if (element != null) {
         let url = "http://danbooru.donmai.us"+element.getAttribute("data-file-url");
         let fileName = url.substring(url.lastIndexOf("/") + 1);
-        self.port.emit("gotImage", [url, fileName, "Danbooru", window.location.href]);
+        self.port.emit("gotImage", {
+            url: url,
+            fileName: fileName,
+            folder: "Danbooru",
+            referrer: window.location.href,
+            tags: element.getAttribute("data-tags")
+        });
     }
 });

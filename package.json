@@ -1,15 +1,22 @@
 {
   "title": "Booru Extractor",
   "name": "booruextractor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "preferences": [
-      {
-        "name": "imagesDirectory",
-        "title": "Images directory path",
-        "description": "Directory, where images should be downloaded",
-        "type": "directory",
-        "value": "C:\\Temp\\"
-      }
+    {
+      "name": "imagesDirectory",
+      "title": "Images directory path",
+      "description": "Directory, where images should be downloaded",
+      "type": "directory",
+      "value": "C:\\Temp\\"
+    },
+    {
+      "name": "underTags",
+      "title": "Under tags",
+      "description": "Tags, which should have sub-directory in gallery directory. Space-separated. If more than one present, first in the list will be used.",
+      "type": "string",
+      "value": "animated 3d"
+    }
   ],
   "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently Gelbooru, Danbooru, Booru.org is supported.",
   "main": "index.js",
