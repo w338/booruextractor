@@ -6,17 +6,20 @@ var preferences = require('sdk/simple-prefs').prefs;
 
 // Supported sources
 var sources = [
-    {"filter": "http://gelbooru.com/index.php?page=post&s=view&id=*", "getter": "./gelbooru.js"},
-    {"filter": "http://danbooru.donmai.us/posts/*", "getter": "./danbooru.js"},
-    {"filter": /.*booru.org.*/, "getter": "./booruorg.js"}
+    {filter: "http://gelbooru.com/index.php?page=post&s=view&id=*"},
+    {filter: "http://danbooru.donmai.us/posts/*"},
+    {filter: "http://safebooru.donmai.us/posts/*"},
+    {filter: "http://safebooru.org/index.php?page=post&s=view&id=*"},
+    {filter: "http://donmai.us/posts/*"},
+    {filter: /.*booru.org.*/},
 ];
 
 // Adding listeners
 for (let source of sources) {
     pageMod.PageMod({
-        include: source["filter"],
+        include: source.filter,
         contentScriptWhen: "ready",
-        contentScriptFile: source["getter"],
+        contentScriptFile: "./booru.js",
         onAttach: function(worker) {
             worker.port.emit("getImage");
             worker.port.on("gotImage", function(data) {
@@ -46,22 +49,20 @@ function DownloadImage(data) {
         CheckFolder(dirPath);
 
         // Analyze tags
-        let subFolder = "";
-        if (preferences['underTags'].length > 0) {
-            let underTags = preferences['underTags'].split(" ");
+        if (preferences['underTags'].length > 0 & data.tags != null) {
             let tags = data.tags.split(" ");
-            for (let uTag of underTags) {
-                if (data.tags.indexOf(uTag) != -1) {
-                    subFolder = uTag;
-                    CheckFolder(OS.Path.join(dirPath, subFolder));
-                    break;
-                }
+            let crossTags = preferences['underTags'].split(" ").filter(function(n) {
+                return tags.indexOf(n) != -1
+            });
+            if (crossTags.length > 0) {
+                dirPath = OS.Path.join(dirPath, crossTags[0]);
+                CheckFolder(dirPath);
             }
         }
 
         // Download file
         let source = { url: data.url, referrer: data.referrer };
-        let path = OS.Path.join(dirPath, subFolder, data.fileName);
+        let path = OS.Path.join(dirPath, data.fileName);
         console.log("Path: "+path);
         yield Downloads.fetch(source, path);
 
