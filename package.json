@@ -1,7 +1,7 @@
 {
   "title": "Booru Extractor",
   "name": "booruextractor",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "preferences": [
     {
       "name": "imagesDirectory",
@@ -18,7 +18,7 @@
       "value": "animated 3d"
     }
   ],
-  "description": "Add-on for automatic extraction of images from image page of booru-like galleries. Currently Gelbooru, Danbooru, Booru.org is supported.",
+  "description": "Add-on for automatic extraction of images from image page of booru-like and other galleries. Currently Gelbooru, Danbooru, Safebooru, Booru.org, e-hentai.org, Flickr is supported.",
   "main": "index.js",
   "author": "VA",
   "engines": {

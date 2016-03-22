@@ -12,6 +12,8 @@ var sources = [
     {filter: "http://safebooru.org/index.php?page=post&s=view&id=*"},
     {filter: "http://donmai.us/posts/*"},
     {filter: /.*booru.org.*/},
+    {filter: "https://www.flickr.com/photos/*"},
+    {filter: "http://g.e-hentai.org/*"},
 ];
 
 // Adding listeners
@@ -47,6 +49,14 @@ function DownloadImage(data) {
         // Check for folder presense
         let dirPath = OS.Path.join(preferences['imagesDirectory'], data.folder);
         CheckFolder(dirPath);
+
+        // Check for subFolder
+        if (data.subFolder != null) {
+            if (data.subFolder.length > 0) {
+                dirPath = OS.Path.join(dirPath, data.subFolder);
+                CheckFolder(dirPath);
+            }
+        }
 
         // Analyze tags
         if (preferences['underTags'].length > 0 & data.tags != null) {
