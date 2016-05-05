@@ -6,14 +6,15 @@ var preferences = require('sdk/simple-prefs').prefs;
 
 // Supported sources
 var sources = [
-    {filter: "http://gelbooru.com/index.php?page=post&s=view&id=*"},
-    {filter: "http://danbooru.donmai.us/posts/*"},
-    {filter: "http://safebooru.donmai.us/posts/*"},
-    {filter: "http://safebooru.org/index.php?page=post&s=view&id=*"},
-    {filter: "http://donmai.us/posts/*"},
-    {filter: /.*booru.org.*/},
-    {filter: "https://www.flickr.com/photos/*"},
-    {filter: "http://g.e-hentai.org/*"},
+    {filter: "http://gelbooru.com/index.php?page=post&s=view&id=*",parser: "Gelbooru"},
+    {filter: "http://danbooru.donmai.us/posts/*",parser: "Danbooru"},
+    {filter: "http://safebooru.donmai.us/posts/*",parser: "Danbooru"},
+    {filter: "http://safebooru.org/index.php?page=post&s=view&id=*",parser: "Danbooru"},
+    {filter: "http://donmai.us/posts/*",parser: "Danbooru"},
+    {filter: /.*booru.org.*/,parser: "Booru"},
+    {filter: "https://www.flickr.com/photos/*",parser: "Flickr"},
+    {filter: "http://g.e-hentai.org/*",parser: "Ehentai"},
+    {filter: "https://chan.sankakucomplex.com/post/show/*",parser: "Gelbooru"},
 ];
 
 // Adding listeners
@@ -21,7 +22,7 @@ for (let source of sources) {
     pageMod.PageMod({
         include: source.filter,
         contentScriptWhen: "ready",
-        contentScriptFile: "./booru.js",
+        contentScriptFile: "./"+ source.parser +".js",
         onAttach: function(worker) {
             worker.port.emit("getImage");
             worker.port.on("gotImage", function(data) {
