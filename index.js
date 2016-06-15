@@ -4,6 +4,9 @@
 var pageMod = require("sdk/page-mod");
 var preferences = require('sdk/simple-prefs').prefs;
 
+// Constants
+var maxPathLength = 256;
+
 // Supported sources
 var sources = [
     {filter: "http://gelbooru.com/index.php?page=post&s=view&id=*",parser: "Gelbooru"},
@@ -14,7 +17,8 @@ var sources = [
     {filter: /.*booru.org.*/,parser: "Booru"},
     {filter: "https://www.flickr.com/photos/*",parser: "Flickr"},
     {filter: "http://g.e-hentai.org/*",parser: "Ehentai"},
-    {filter: "https://chan.sankakucomplex.com/post/show/*",parser: "Gelbooru"},
+    {filter: "https://chan.sankakucomplex.com/post/show/*",parser: "Sankaku"},
+    {filter: "https://idol.sankakucomplex.com/post/show/*",parser: "Sankaku"},
 ];
 
 // Adding listeners
@@ -46,16 +50,27 @@ function DownloadImage(data) {
         const {Downloads} = Cu.import("resource://gre/modules/Downloads.jsm");
         Cu.import("resource://gre/modules/osfile.jsm")
         Cu.import("resource://gre/modules/NetUtil.jsm");  
+        
+        // Lets start constructing file path
+        let fileName = CleanFileName(data.fileName);
+        let dirPath = OS.Path.normalize(CleanDirectory(preferences['imagesDirectory']));
+        CheckFolder(dirPath);
 
         // Check for folder presense
-        let dirPath = OS.Path.join(preferences['imagesDirectory'], data.folder);
-        CheckFolder(dirPath);
+        let folder = CleanDirectory(data.folder);
+        if ( (fileName+dirPath+folder).length < maxPathLength ) {
+            dirPath = OS.Path.join(dirPath, folder);
+            CheckFolder(dirPath); 
+        }
 
         // Check for subFolder
         if (data.subFolder != null) {
             if (data.subFolder.length > 0) {
-                dirPath = OS.Path.join(dirPath, data.subFolder);
-                CheckFolder(dirPath);
+                let subFolder = CleanDirectory(data.subFolder);
+                if ( (fileName+dirPath+subFolder).length < maxPathLength ) {
+                    dirPath = OS.Path.join(dirPath, subFolder);
+                    CheckFolder(dirPath);
+                }
             }
         }
 
@@ -66,16 +81,23 @@ function DownloadImage(data) {
                 return tags.indexOf(n) != -1
             });
             if (crossTags.length > 0) {
-                dirPath = OS.Path.join(dirPath, crossTags[0]);
-                CheckFolder(dirPath);
+                let crossTag = CleanDirectory(crossTags[0]);
+                if ( (fileName+dirPath+crossTag).length < maxPathLength ) {
+                    dirPath = OS.Path.join(dirPath, crossTag);
+                    CheckFolder(dirPath);
+                }
             }
         }
 
         // Download file
         let source = { url: data.url, referrer: data.referrer };
-        let path = OS.Path.join(dirPath, data.fileName);
+        let path = OS.Path.join(dirPath, fileName);
         console.log("Path: "+path);
-        yield Downloads.fetch(source, path);
+        try {
+            yield Downloads.fetch(source, path);
+        } catch (ex) {
+            console.log("Download error: "+ex);
+        }
 
     }).then(null, Cu.reportError);
 }
@@ -94,4 +116,12 @@ function CheckFolder(name) {
     if(!Dir.exists()) {
         Dir.create(Dir.DIRECTORY_TYPE,FileUtils.PERMS_DIRECTORY);
     }
+}
+
+function CleanFileName(name) {
+    return name.replace(/[<>:"\/\\|?*\x00-\x1F]/gi, '_'); // Strip any special characters
+}
+
+function CleanDirectory(name) {
+    return name.replace(/[<>"|?*\x00-\x1F]/gi, '_'); // Strip any special characters
 }
