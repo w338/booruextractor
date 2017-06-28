@@ -1,14 +1,14 @@
 function saveOptions(e) {
   e.preventDefault();
   browser.storage.local.set({
-    color: document.querySelector("#underTags").value
+    underTags: document.querySelector("#underTags").value
   });
 }
 
 function restoreOptions() {
 
   function setCurrentChoice(result) {
-    document.querySelector("#underTags").value = result.color || "animated 3d";
+    document.querySelector("#underTags").value = result.underTags || "animated 3d";
   }
 
   function onError(error) {
