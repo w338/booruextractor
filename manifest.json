@@ -1,0 +1,61 @@
+{
+
+  "manifest_version": 2,
+  "name": "Booru Extractor 2",
+  "version": "0.2.0",
+  "description": "Add-on for automatic extraction of images from image page of booru-like and other galleries. Currently Gelbooru, Danbooru, Safebooru, Booru.org, e-hentai.org, Flickr, Sankakucomplex is supported.",
+  "homepage_url": "https://github.com/vasyaabr/booruextractor",
+  "author": "VA",
+
+  "applications": {
+    "gecko": {
+      "id": "@booruextractor",
+      "strict_min_version": "42.0"
+    }
+  },
+
+  "icons": {
+    "64": "icons/icon.jpg"
+  },
+
+  "background": {
+    "scripts": ["main.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://gelbooru.com/index.php?page=post&s=view&id=*"],
+      "js": ["data/Gelbooru.js"]
+    },
+    {
+      "matches": ["*://danbooru.donmai.us/posts/*","*://safebooru.donmai.us/posts/*","*://safebooru.org/index.php?page=post&s=view&id=*","*://donmai.us/posts/*"],
+      "js": ["data/Danbooru.js"]
+    },
+    {
+      "matches": ["*://*.sankakucomplex.com/post/show/*"],
+      "js": ["data/Sankaku.js"]
+    },
+    {
+      "matches": ["*://www.flickr.com/photos/*"],
+      "js": ["data/Flickr.js"]
+    },
+    {
+      "matches": ["*://g.e-hentai.org/*"],
+      "js": ["data/Ehentai.js"]
+    },
+    {
+      "matches": ["*://*.booru.org/*"],
+      "js": ["data/Booru.js"]
+    }
+  ],
+
+  "options_ui": {
+    "page": "options.html"
+  },
+
+  "permissions": [
+    "downloads",
+    "storage"
+  ]  
+
+}

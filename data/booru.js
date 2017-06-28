@@ -1,7 +1,6 @@
 // Image page parsers
 
 // Some booru.org support
-self.port.on("getImage", function () {
     var element = document.getElementById("image");
     if (element != null) {
         // Get URL and filename
@@ -17,12 +16,12 @@ self.port.on("getImage", function () {
         else
             tags = element.getAttribute("alt");
         // Send it
-        self.port.emit("gotImage", {
+        let response = {
             url: url,
             fileName: fileName,
             folder: window.location.hostname,
             referrer: window.location.href,
             tags: tags_element.innerText
-        });
+        };
+        browser.runtime.sendMessage(response);
     }
-});
