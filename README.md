@@ -1,3 +1,6 @@
+#SUPPORT DISCONTINUED.
+But you are free to fork the project :)
+
 #Booru Extractor
 
 Firefox add-on for automatic extraction of images from image page of booru-like and other galleries. Files saved in a separate folders, for each gallery. 
