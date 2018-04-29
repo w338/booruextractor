@@ -3,8 +3,12 @@
 // Danbooru style
     var element = document.getElementById("image-container");
     if (element != null) {
-        let url = window.location.origin + element.getAttribute("data-file-url");
+        let url = element.getAttribute("data-file-url");
         let fileName = url.substring(url.lastIndexOf("/") + 1);
+        try {
+          let downloadAnchor = document.querySelector('a[download]');
+          fileName = downloadAnchor.href.match(/.*\/([^?]*)/)[1];
+        } catch (e) {}
         let response = {
             url: url,
             fileName: fileName,
