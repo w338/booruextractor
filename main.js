@@ -1,13 +1,12 @@
-// Constants
-var maxPathLength = 256;
+let maxPathLength = 255;
 
-// Set user options
-var underTags = '';
-var getting = browser.storage.local.get("underTags");
-getting.then(function (result) {
-    underTags = result.underTags || "animated 3d";
-},
-    function (error) {
+let underTags = '';
+var getting =
+browser.storage.local.get("underTags")
+    .then((result) => {
+      underTags = result.underTags || "animated 3d";
+    },
+    (error) => {
         console.log(`Error restoring options: ${error}`);
     });
 
@@ -19,9 +18,11 @@ browser.storage.onChanged.addListener(updateOptions);
 function updateOptions(changes, area) {
     if (area == 'local') {
         var changedItems = Object.keys(changes);
-        for (var item of changedItems)
-            if (item == 'underTags') 
+        for (let item of changedItems) {
+            if (item == 'underTags') {
                 underTags = changes[item].newValue;
+            }
+        }
     }
 }
 
@@ -35,7 +36,7 @@ function DownloadImage(data) {
 
     // Lets start constructing file path
     let fileName = CleanFileName(data.fileName);
-    dirPath = 'booruextractor\\' + data.folder;
+    let dirPath = 'booruextractor/' + data.folder;
 
     // Check for subFolder
     if (data.subFolder != null) {
@@ -56,10 +57,10 @@ function DownloadImage(data) {
     }
 
     // Download file
-    let path = dirPath + "\\" + fileName;
-    console.log("Path: " + path);
+    let path = dirPath + '/' + fileName;
+    console.log('download path: ' + path);
 
-    var downloading = browser.downloads.download({
+    let downloading = browser.downloads.download({
         url: data.url,
         filename: path,
         conflictAction: 'overwrite',
@@ -71,12 +72,12 @@ function DownloadImage(data) {
 function CheckFolder(currentDir, fileName, addOn) {
 
     // Check for max length, allowed by OS
-    var cleanAddOn = CleanDirectory(addOn);
-    if ((currentDir + '\\' + cleanAddOn + '\\' + fileName).length > maxPathLength) {
+    let cleanAddOn = CleanDirectory(addOn);
+    if ((currentDir + '/' + cleanAddOn + '/' + fileName).length > maxPathLength) {
         return currentDir;
     }
 
-    newCurrentDir = currentDir + '\\' + cleanAddOn;
+    let newCurrentDir = currentDir + '/' + cleanAddOn;
 
     return newCurrentDir;
 }
