@@ -45,6 +45,10 @@
     {
       "matches": ["*://*.booru.org/*"],
       "js": ["data/booru.js"]
+    },
+    {
+      "matches": ["*://www.pixiv.net/member_illust.php*"],
+      "js": ["data/Pixiv.js"]
     }
   ],
 

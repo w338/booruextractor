@@ -63,6 +63,12 @@ function DownloadImage(data) {
     let downloading = browser.downloads.download({
         url: data.url,
         filename: path,
+        headers: [
+          {
+            name: 'Referer',
+            value: data.referrer
+          }
+        ],
         conflictAction: 'overwrite',
         saveAs: false
     });
