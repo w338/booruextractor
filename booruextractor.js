@@ -1,4 +1,10 @@
 let maxPathLength = 255;
+let max_suspicious_bytes = 1024;
+
+function log() {
+  // Uncomment for debug output
+  // console.log.apply(console, arguments);
+}
 
 let underTags = '';
 var getting =
@@ -7,7 +13,7 @@ browser.storage.local.get("underTags")
       underTags = result.underTags || "animated 3d";
     },
     (error) => {
-        console.log(`Error restoring options: ${error}`);
+        log(`Error restoring options: ${error}`);
     });
 
 // Set listeners
@@ -27,12 +33,12 @@ function updateOptions(changes, area) {
 }
 
 function download(message) {
-    console.log("Image data: " + JSON.stringify(message));
+    log("Image data: " + JSON.stringify(message));
     DownloadImage(message);
 }
 
 // Downloader
-function DownloadImage(data) {
+async function DownloadImage(data) {
 
     // Lets start constructing file path
     let fileName = CleanFileName(data.fileName);
@@ -58,20 +64,62 @@ function DownloadImage(data) {
 
     // Download file
     let path = dirPath + '/' + fileName;
-    console.log('download path: ' + path);
+    log('download path: ' + path);
 
-    let downloading = browser.downloads.download({
-        url: data.url,
-        filename: path,
-        headers: [
-          {
-            name: 'Referer',
-            value: data.referrer
-          }
-        ],
-        conflictAction: 'overwrite',
-        saveAs: false
-    });
+    function download_item_is_good(download_item) {
+      return download_item.totalBytes > max_suspicious_bytes;
+    }
+
+    async function download() {
+      let previous_downloads = await browser.downloads.search({url: data.url});
+      if (previous_downloads.length > 0 &&
+          download_item_is_good(previous_downloads[0])) {
+        log(`Skipping download of ${data.url}`)
+        return previous_downloads[0];
+      }
+      let downloadId = await browser.downloads.download({
+          url: data.url,
+          filename: path,
+          conflictAction: 'overwrite',
+          saveAs: false
+      });
+      while (true) {
+        let downloadItems = await browser.downloads.search({id: downloadId});
+        let downloadItem = downloadItems[0];
+        if (downloadItem.state === "complete") {
+          return downloadItem;
+        } else if (downloadItem.state === "interrupted") {
+          throw TypeError(`Download of ${data.url} was interrupted.`);
+        }
+      }
+    }
+
+    try {
+      // Probably just an error message, retry.
+      let downloadItem = await download();
+      for (let i = 0; i < 2; i++) {
+        if (!download_item_is_good(downloadItem)) {
+          downloadItem = await download();
+        }
+      }
+      if (!download_item_is_good(downloadItem)) {
+        let msg = `Image ${data.url} is suspiciously short.`;
+        console.error(msg);
+        browser.notifications.create({
+          type: "basic",
+          title: "Image Download (Probably) Failed",
+          message: msg
+        });
+      }
+    } catch (e) {
+      let msg = `Image ${data.url} could not be downloaded: ${e.message}`;
+      console.error(msg);
+      browser.notifications.create({
+        type: "basic",
+        title: "Image Download Failed",
+        message: msg
+      });
+    }
 }
 
 // Check for folder presence and create it, if needed
